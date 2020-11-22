@@ -1,12 +1,29 @@
 const { Schema, model } = require("mongoose");
 
+const FriendSchema = new Schema(
+  {
+    reactionId: {
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
+    },
+    username: {
+      type: String,
+    },
+  },
+  {
+    toJSON: {
+      getters: true,
+    },
+  }
+);
+
 const UserSchema = new Schema(
   {
     username: {
       type: String,
       trim: true,
       required: "First Name is Required",
-      Unique: yes,
+      Unique: true,
     },
     email: {
       type: String,
@@ -18,10 +35,10 @@ const UserSchema = new Schema(
     thought: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Comment",
+        ref: "Thought",
       },
     ],
-    friends: [],
+    friends: [FriendSchema],
   },
 
   // Set the schema option to use virtuals 'id' as false
@@ -36,7 +53,10 @@ const UserSchema = new Schema(
 
 // get total count of friends on retrieval
 UserSchema.virtual("friendCount").get(function () {
-  return this.email.slice(0, this.email.indexof("@"));
+  return this.thought.reduce(
+    (total, thought) => total + thought.reaction.length + 1,
+    0
+  );
 });
 
 // create the User model using the UserSchema

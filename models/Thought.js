@@ -1,60 +1,72 @@
 const { Schema, model } = require("mongoose");
 
-const ReactionSchema = new Schema(
-    {
-      reactionId: {
-        type: Schema.Types.ObjectId,
-        default: () => new Types.ObjectId(),
-      },
-      reactionBody: {
-        type: String,
-        required: "Field is Required",
-      },
-      username: {
-        type: String,
-      },
-      createdAt: {
-        type: Date,
-        default: Date.now,
-        get: (createdAtVal) => dateFormat(createdAtVal),
-      },
-    },
-    {
-      toJSON: {
-        getters: true,
-      }
-    }
-  );
+const dateFormat = require("../utils/dateFormat");
 
-const ThoughtSchema = new Schema({
-  thoughtText: {
-    type: String,
-    required: "Field is Required",
-    validate: [({ length }) => length >= 128, "Thought is too longer."],
+const ReactionSchema = new Schema(
+  {
+    reactionId: {
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
+    },
+    reactionBody: {
+      type: String,
+      required: "Field is Required",
+      maxlength: 280,
+    },
+    username: {
+      type: String,
+      required: "Field is Required",
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      get: (createdAtVal) => dateFormat(createdAtVal),
+    },
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-    get: (createdAtVal) => dateFormat(createdAtVal),
+  {
+    toJSON: {
+      getters: true,
+    },
+    id: false,
+  }
+);
+
+const ThoughtSchema = new Schema(
+  {
+    thoughtText: {
+      type: String,
+      required: "Field is Required",
+      minlength: 1,
+      maxlength: 208,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      get: (createdAtVal) => dateFormat(createdAtVal),
+    },
+    username: {
+      type: String,
+      required: "Field is Required",
+    },
+    user: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    reactions: [ReactionSchema],
   },
-  userneame: {
-    type: String,
-    required: "Username is Required",
-  },
-  reactions: [ReactionSchema],
-},
-{
+  {
     toJSON: {
       virtuals: true,
-      getters: true
+      getters: true,
     },
-    id: false
+    id: false,
   }
-
 );
-ThoughtSchema.virtual('reactionCount').get(function() {
-    return this.reactions.length;
-  });
+ThoughtSchema.virtual("reactionCount").get(function () {
+  return this.reactions.length;
+});
 
 // create the User model using the UserSchema
 const Thought = model("Thought", ThoughtSchema);

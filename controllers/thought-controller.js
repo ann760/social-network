@@ -23,17 +23,20 @@ const thoughtController = {
 
   // get thought by id
   getThoughtById({ params }, res) {
-    Thought.findOne({ _id: params.id })
+    console.log(params);
+    Thought.findOne({ _id: params.thoughtId })
       .populate({
         path: "reactions",
         select: "-__v",
       })
       .select("-__v")
       .then((dbThoughtData) => {
+        console.log(dbThoughtData);
         if (!dbThoughtData) {
           res.status(404).json({ message: "No Thought found with this id!" });
           return;
         }
+
         res.json(dbThoughtData);
       })
       .catch((err) => {
@@ -49,7 +52,7 @@ const thoughtController = {
       .then(({ _id }) => {
         return User.findOneAndUpdate(
           { _id: params.userId },
-          { $push: { thoughts: _id } },
+          { $push: { thought: _id } },
           { new: true }
         );
       })
@@ -60,14 +63,16 @@ const thoughtController = {
           return;
         }
         res.json(dbUserData);
-        console.log(dbUserData);
       })
       .catch((err) => res.json(err));
   },
 
   updateThought({ params, body }, res) {
-    Thought.findOneAndUpdate({ _id: params.thoughtId }, { new: true })
+    console.log(params);
+    console.log(body);
+    Thought.findOneAndUpdate({ _id: params.thoughtId }, body, { new: true })
       .then((dbUserData) => {
+        console.log(dbThoughtData);
         if (!dbUserData) {
           res.status(404).json({ message: "No user found with this id!" });
           return;
@@ -86,33 +91,37 @@ const thoughtController = {
         }
         return User.findOneAndUpdate(
           { _id: params.useraId },
-          { $pull: { thoughts: params.thoughtId } },
+          { $pull: { thought: params.thoughtId } },
           { new: true }
         );
-      })
-      .then((dbUserData) => {
-        if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id!" });
-          return;
-        }
-        res.json(dbUserData);
+        })
+        .then((dbUserData) => {
+          if (!dbUserData) {
+            res.status(404).json({ message: "No user found with this id!" });
+            return;
+          }
+          console.log(dbUserData)
+          res.json(dbUserData);
       })
       .catch((err) => res.json(err));
   },
 
   // add reaction
   addReaction({ params, body }, res) {
+    console.log(params);
+    console.log(body);
     Thought.findOneAndUpdate(
       { _id: params.thoughtId },
-      { $push: { reaction: body } },
+      { $push: { reactions: body } },
       { new: true }
     )
-      .then((dbUserData) => {
-        if (!dbUserData) {
-          res.status(404).json({ message: "No user found with this id!" });
+      .then((dbReactiontData) => {
+        console.log(dbReactiontData)
+        if (!dbReactiontData) {
+          res.status(404).json({ message: "No thought found with this id!" });
           return;
         }
-        res.json(dbUserData);
+        res.json(dbReactiontData);
       })
       .catch((err) => res.json(err));
   },
